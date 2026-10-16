@@ -56,12 +56,18 @@ docker compose run --rm app einordnen.py
 `app/` is mounted into the container, so code changes take effect immediately.
 Rebuild only after changing `requirements.txt` or the `Dockerfile`.
 
+## Exercise notes
+
+- [Aufgabe 1](docs/task1.md): Setup, latency measurements and model answers
+
 ## Project structure
 
 ```
 .
 ├── compose.yaml
 ├── .env.example
+├── docs/
+│   └── task1.md         # notes and results for Aufgabe 1
 └── app/
     ├── llm.py           # shared client, reads config from env
     ├── hallo_llm.py     # single request with TTFT measurement
