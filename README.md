@@ -59,6 +59,7 @@ Rebuild only after changing `requirements.txt` or the `Dockerfile`.
 ## Exercise notes
 
 - [Aufgabe 1](docs/task1.md): Setup, latency measurements and model answers
+- [Aufgabe 2](docs/task2.md): Comparison of `llama3.2:3b` and `qwen2.5:0.5b`
 
 ## Project structure
 
@@ -67,7 +68,8 @@ Rebuild only after changing `requirements.txt` or the `Dockerfile`.
 ├── compose.yaml
 ├── .env.example
 ├── docs/
-│   └── task1.md         # notes and results for Aufgabe 1
+│   ├── task1.md         # notes and results for Aufgabe 1
+│   └── task2.md         # model comparison for Aufgabe 2
 └── app/
     ├── llm.py           # shared client, reads config from env
     ├── hallo_llm.py     # single request with TTFT measurement
