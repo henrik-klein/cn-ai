@@ -11,12 +11,14 @@ Aufruf:
 from llm import MODEL, client
 
 TEXTE = {
-    "Deutsch": "Wie melde ich mich im Studiengang Angewandte Informatik "
-               "für die Prüfung in Mathematik 3 an, und bis wann ist "
-               "die Anmeldefrist?",
-    "Englisch": "How do I register for the Mathematics 3 exam in the "
-                "Applied Computer Science program, and what is the "
-                "registration deadline?",
+    "Deutsch": (
+        "Wo finde ich die Prüfungsanmeldungsfrist und die "
+        "Rückmeldegebührenüberweisungsbestätigung?"
+    ),
+    "Englisch": (
+        "Where can I find the exam registration deadline and the "
+        "confirmation of the re-enrollment fee transfer?"
+    ),
 }
 
 
