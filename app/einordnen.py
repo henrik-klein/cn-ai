@@ -51,14 +51,24 @@ def einordnen(mail: str, versuche: int = 3) -> Anfrage:
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": mail},
     ]
-    # TODO 1: Ruft das Modell auf. Wählt eine passende temperature
-    #         und übergebt response_format=schema_von(Anfrage).
-    # TODO 2: Prüft die Antwort mit Anfrage.model_validate_json(...).
-    # TODO 3: Schlägt die Prüfung fehl (ValidationError), versucht es
-    #         erneut, höchstens `versuche`-mal. Gebt bei jedem
-    #         Fehlversuch eine kurze Meldung aus. Klappt es gar
-    #         nicht, werft einen RuntimeError.
-    raise NotImplementedError("TODO: einordnen() umsetzen")
+    for versuch in range(1, versuche + 1):
+        # TODO 1
+        # Temperature 0: Einordnung ist Klassifikation/Extraktion, braucht
+        # keine Kreativität und soll für dieselbe Mail reproduzierbar sein.
+        antwort = client.chat.completions.create(
+            model=MODEL,
+            messages=nachricht,
+            temperature=0,
+            response_format=schema_von(Anfrage),
+        )
+        roh = antwort.choices[0].message.content or ""
+        # TODO 2 + 3
+        try:
+            return Anfrage.model_validate_json(roh)
+        except ValidationError as fehler:
+            print(f"Versuch {versuch}/{versuche} ungültig: "
+                  f"{fehler.error_count()} Fehler", file=sys.stderr)
+    raise RuntimeError(f"Keine gültige Einordnung nach {versuche} Versuchen")
 
 
 def auswerten() -> None:
