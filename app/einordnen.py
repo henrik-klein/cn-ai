@@ -62,6 +62,7 @@ def einordnen(mail: str, versuche: int = 3) -> Anfrage:
             response_format=schema_von(Anfrage),
         )
         roh = antwort.choices[0].message.content or ""
+        # print("ROH:", roh)
         # TODO 2 + 3
         try:
             return Anfrage.model_validate_json(roh)
