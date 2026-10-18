@@ -78,9 +78,12 @@ def auswerten() -> None:
     richtig = 0
     for fall in faelle:
         ergebnis = einordnen(fall["mail"])
-        # TODO 4: Vergleicht ergebnis mit fall["erwartet"]. Zählt einen
-        #         Fall als richtig, wenn das Anliegen stimmt. Gebt für
-        #         jeden Fall Mail, Ergebnis und ✓ oder ✗ aus.
+        treffer = ergebnis.anliegen == fall["erwartet"]["anliegen"]
+        if treffer:
+            richtig += 1
+        print(f"\n{'✓' if treffer else '✗'} {fall['mail']}")
+        print(f"  Ergebnis: {ergebnis.model_dump_json()}")
+        print(f"  Erwartet: {json.dumps(fall['erwartet'], ensure_ascii=False)}")
     print(f"\n{richtig} von {len(faelle)} Anliegen richtig ({MODEL})")
 
 
