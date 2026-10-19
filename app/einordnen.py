@@ -15,7 +15,7 @@ import json
 import sys
 from typing import Literal
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, field_validator
 
 from llm import MODEL, client
 
@@ -27,11 +27,26 @@ SYSTEM_PROMPT = (
     "frist ist die Frist aus der Mail, so wie sie dort steht, oder null."
 )
 
+DEGREE_PROGRAMS = {"AIN", "WIN", "MSI"}
+
 
 class Anfrage(BaseModel):
     anliegen: Literal["pruefung", "mensa", "bibliothek", "sonstiges"]
     studiengang: str | None
     frist: str | None
+
+    @field_validator("studiengang", "frist", mode="before")
+    @classmethod
+    def null_text_to_none(cls, value):
+        if isinstance(value, str) and value.strip() in ("", "null", "None"):
+            return None
+        return value
+
+    @field_validator("studiengang")
+    @classmethod
+    def known_program_only(cls, value):
+        # Reject codes that are not on the list instead of trusting the model.
+        return value if value in DEGREE_PROGRAMS else None
 
 
 def schema_von(modell: type[BaseModel]) -> dict:
@@ -43,6 +58,16 @@ def schema_von(modell: type[BaseModel]) -> dict:
             "schema": modell.model_json_schema(),
         },
     }
+
+def all_fields_correct(ergebnis: Anfrage, erwartet: dict) -> bool:
+    """Anliegen and Studiengang must match exactly, Frist must be contained."""
+    if erwartet["frist"] is None:
+        frist_ok = ergebnis.frist is None
+    else:
+        frist_ok = ergebnis.frist is not None and erwartet["frist"] in ergebnis.frist
+    return (ergebnis.anliegen == erwartet["anliegen"]
+            and ergebnis.studiengang == erwartet["studiengang"]
+            and frist_ok)
 
 
 def einordnen(mail: str, versuche: int = 3) -> Anfrage:
@@ -65,11 +90,17 @@ def einordnen(mail: str, versuche: int = 3) -> Anfrage:
         # print("ROH:", roh)
         # TODO 2 + 3
         try:
-            return Anfrage.model_validate_json(roh)
+            anfrage = Anfrage.model_validate_json(roh)
         except ValidationError as fehler:
             print(f"Versuch {versuch}/{versuche} ungültig: "
                   f"{fehler.error_count()} Fehler", file=sys.stderr)
-    raise RuntimeError(f"Keine gültige Einordnung nach {versuche} Versuchen")
+            continue
+
+        if anfrage.frist and anfrage.frist not in mail:
+            print(f"Warning: deadline '{anfrage.frist}' not found in mail",
+                  file=sys.stderr)
+            anfrage.frist = None
+        return anfrage
 
 
 def auswerten() -> None:
@@ -77,16 +108,19 @@ def auswerten() -> None:
     with open("mails.json", encoding="utf-8") as f:
         faelle = json.load(f)
     richtig = 0
+    all_correct = 0
     for fall in faelle:
         ergebnis = einordnen(fall["mail"])
         treffer = ergebnis.anliegen == fall["erwartet"]["anliegen"]
         if treffer:
             richtig += 1
+        if all_fields_correct(ergebnis, fall["erwartet"]):
+            all_correct += 1
         print(f"\n{'✓' if treffer else '✗'} {fall['mail']}")
         print(f"  Ergebnis: {ergebnis.model_dump_json()}")
         print(f"  Erwartet: {json.dumps(fall['erwartet'], ensure_ascii=False)}")
     print(f"\n{richtig} von {len(faelle)} Anliegen richtig ({MODEL})")
-
+    print(f"{all_correct} von {len(faelle)} mit allen drei Feldern richtig")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
