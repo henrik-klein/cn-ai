@@ -60,6 +60,9 @@ Rebuild only after changing `requirements.txt` or the `Dockerfile`.
 
 - [Aufgabe 1](docs/task1.md): Setup, latency measurements and model answers
 - [Aufgabe 2](docs/task2.md): Comparison of `llama3.2:3b` and `qwen2.5:0.5b`
+- [Aufgabe 3](docs/task3.md): Sampling across temperatures and token counts
+- [Aufgabe 4](docs/task4.md): Structured classification of student emails
+- [Reflection](docs/reflection.md): Reflection on the exercise
 
 ## Project structure
 
@@ -69,7 +72,10 @@ Rebuild only after changing `requirements.txt` or the `Dockerfile`.
 ├── .env.example
 ├── docs/
 │   ├── task1.md         # notes and results for Aufgabe 1
-│   └── task2.md         # model comparison for Aufgabe 2
+│   ├── task2.md         # model comparison for Aufgabe 2
+│   ├── task3.md         # sampling and tokens for Aufgabe 3
+│   ├── task4.md         # email classification for Aufgabe 4
+│   └── reflection.md    # reflection on the exercise
 └── app/
     ├── llm.py           # shared client, reads config from env
     ├── hallo_llm.py     # single request with TTFT measurement
