@@ -9,7 +9,7 @@ which model is used is defined by configuration only, never in code.
 | Exercise                       | Topic                                                  | Status      |
 |--------------------------------|--------------------------------------------------------|-------------|
 | [Übung 1](uebung_1/README.md)  | Model server setup, sampling, structured classification | Done        |
-| [Übung 2](uebung_2/README.md)  | Versioned prompts, prompt attacks, knowledge retrieval  | In progress |
+| [Übung 2](uebung_2/README.md)  | Versioned prompts, prompt attacks, knowledge retrieval  | Done        |
 
 Each exercise README links its solutions and lists its scripts.
 

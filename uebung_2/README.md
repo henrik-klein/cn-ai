@@ -4,7 +4,12 @@ Setup, configuration and architecture are described in the [main README](../READ
 
 ## Solutions
 
-Not available yet, this exercise is in progress.
+- [Aufgabe 1](solutions/task1.md): Prompts as versioned artifacts
+- [Aufgabe 2](solutions/task2.md): Improving and measuring the classification
+- [Aufgabe 3](solutions/task3.md): Attacking and hardening the assistant
+- [Aufgabe 4](solutions/task4.md): Knowledge retrieval with file search and RAG
+- [Bonus](solutions/bonus.md): A model attacks the assistant
+- [Reflection](solutions/reflection.md): Reflection on the exercise
 
 ## Additions to the shared setup
 
@@ -43,6 +48,13 @@ docker compose run --rm app vergleich_wissen.py
 .
 ├── compose.yaml
 ├── .env.example
+├── solutions/
+│   ├── task1.md              # versioned prompts for Aufgabe 1
+│   ├── task2.md              # classification comparison for Aufgabe 2
+│   ├── task3.md              # attacks and defenses for Aufgabe 3
+│   ├── task4.md              # knowledge retrieval for Aufgabe 4
+│   ├── bonus.md              # a model attacks the assistant
+│   └── reflection.md         # reflection on the exercise
 └── app/
     ├── llm.py                # shared client, reads config from env
     ├── prompts.py            # loads versioned prompts
