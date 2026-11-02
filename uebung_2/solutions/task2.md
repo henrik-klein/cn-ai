@@ -64,9 +64,3 @@ studiengang: Literal["AIN", "WIN", "MSI"] | None
 **Verhindert nicht:** Der Angriff beeinflusst weiter die Entscheidung. Das Modell wird sogar in einen plausiblen, falschen Wert gezwungen, aus einem sichtbaren Fehler wird ein unsichtbarer.
 
 **Ebene:** Die Abwehr wirkt im System (Dekodierung und Pydantic), unabhängig vom Prompt. Der Prompt bittet, das Schema erzwingt, aber nur das Format, nicht den Inhalt.
-
----
-
-## 2.5
-
-Optional, nicht bearbeitet.
