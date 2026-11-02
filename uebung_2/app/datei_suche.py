@@ -11,8 +11,10 @@ oder mit --woerter einfach aus den Wörtern der Frage.
 """
 
 import argparse
+import math
 import re
 import time
+from collections import Counter
 
 from pydantic import BaseModel, Field
 
@@ -23,6 +25,7 @@ from wissen import Treffer, antworten, dokumente, zeigen
 
 MAX_DATEIEN = 3
 MAX_BEGRIFFE = 6
+BM25 = True  # Teil 4.5: False = Trefferzählung aus TODO 4a
 
 # Wörter, die in fast jedem Dokument stehen und nichts über das Thema sagen.
 STOPPWOERTER = {
@@ -61,6 +64,11 @@ def begriffe_vom_modell(frage: str) -> list[str]:
         return woerter_der_frage(frage)
 
 
+def woerter(text: str) -> list[str]:
+    """Zerlegt einen Text in ganze Wörter ("tag" trifft nicht "Montag")."""
+    return re.findall(r"[\wäöüß§-]+", text.lower())
+
+
 def suche(begriffe: list[str], max_dateien: int = MAX_DATEIEN) -> list[Treffer]:
     """Unser grep: findet die Dateien, in denen die Begriffe am häufigsten vorkommen.
 
@@ -77,13 +85,49 @@ def suche(begriffe: list[str], max_dateien: int = MAX_DATEIEN) -> list[Treffer]:
     #   - Nur Dateien mit mindestens einem Treffer kommen in die Liste,
     #     als Treffer(datei, text, wert).
     #   - Sortiert absteigend nach wert und gebt die ersten max_dateien zurück.
-    raise NotImplementedError("TODO 4a in datei_suche.py")
+    gefunden = []
+    for datei, text in dokumente().items():
+        klein = text.lower()
+        wert = sum(klein.count(b.lower()) for b in begriffe)
+        if wert > 0:
+            gefunden.append(Treffer(datei, text, wert))
+    gefunden.sort(key=lambda t: t.wert, reverse=True)
+    return gefunden[:max_dateien]
+
+
+def suche_bm25(
+    begriffe: list[str], max_dateien: int = MAX_DATEIEN, k1: float = 1.5, b: float = 0.75
+) -> list[Treffer]:
+    """Bewertet die Dateien mit BM25 statt mit der reinen Trefferzahl.
+
+    Seltene Begriffe zählen mehr, Wiederholungen in einer Datei werden
+    gedämpft, und die Länge der Datei wird ausgeglichen.
+    """
+    texte = dokumente()
+    zaehler = {datei: Counter(woerter(text)) for datei, text in texte.items()}
+    laengen = {datei: sum(z.values()) for datei, z in zaehler.items()}
+    n = len(texte)
+    schnitt = sum(laengen.values()) / n
+    suchwoerter = [wort for begriff in begriffe for wort in woerter(begriff)]
+
+    gefunden = []
+    for datei, text in texte.items():
+        wert = 0.0
+        for wort in suchwoerter:
+            df = sum(wort in z for z in zaehler.values())
+            idf = math.log((n - df + 0.5) / (df + 0.5) + 1)
+            tf = zaehler[datei][wort]
+            wert += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * laengen[datei] / schnitt))
+        if wert > 0:
+            gefunden.append(Treffer(datei, text, wert))
+    gefunden.sort(key=lambda t: t.wert, reverse=True)
+    return gefunden[:max_dateien]
 
 
 def abrufen(frage: str, nur_woerter: bool = False) -> tuple[list[Treffer], list[str], float]:
     start = time.perf_counter()
     begriffe = woerter_der_frage(frage) if nur_woerter else begriffe_vom_modell(frage)
-    treffer = suche(begriffe)
+    treffer = suche_bm25(begriffe) if BM25 else suche(begriffe)
     return treffer, begriffe, time.perf_counter() - start
 
 

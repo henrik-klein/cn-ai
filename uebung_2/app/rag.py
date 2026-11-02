@@ -50,7 +50,19 @@ def zerlege(datei: str, text: str) -> list[Treffer]:
     #   - Stellt jedem Abschnitt den Titel des Dokuments voran (erste Zeile,
     #     beginnt mit "# "), damit er auch allein verständlich bleibt.
     # Danach den Index neu bauen: rag.py --index
-    return [Treffer(datei, text.strip())]
+    zeilen = text.strip().splitlines()
+    if zeilen and zeilen[0].startswith("# "):
+        titel = zeilen[0][2:].strip()
+        rumpf = "\n".join(zeilen[1:]).strip()
+    else:
+        titel, rumpf = datei, text.strip()
+
+    if re.search(r"^## ", rumpf, flags=re.MULTILINE):
+        teile = re.split(r"\n(?=## )", rumpf)   # vor jeder Zwischenüberschrift trennen
+    else:
+        teile = re.split(r"\n\s*\n", rumpf)     # sonst an Leerzeilen in Absätze
+
+    return [Treffer(datei, f"# {titel}\n{t.strip()}") for t in teile if t.strip()]
 
 
 def einbetten(texte: list[str]) -> list[list[float]]:
